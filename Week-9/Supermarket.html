@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supermarket Billing System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8">
+  <h1 class="text-3xl font-bold mb-6 text-green-600">🛒 Supermarket Billing System</h1>
+
+  <!-- Billing Form -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-2xl">
+    <form id="itemForm" class="flex flex-wrap gap-4">
+      <input id="itemName" type="text" placeholder="Item Name" required
+        class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" />
+      <input id="itemQty" type="number" placeholder="Quantity" min="1" required
+        class="w-28 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" />
+      <input id="itemPrice" type="number" placeholder="Price" min="0" required
+        class="w-32 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" />
+      <button type="submit"
+        class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition">Add</button>
+    </form>
+
+    <!-- Table -->
+    <div class="mt-6 overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-green-100">
+            <th class="p-2 border">#</th>
+            <th class="p-2 border">Item</th>
+            <th class="p-2 border">Qty</th>
+            <th class="p-2 border">Price</th>
+            <th class="p-2 border">Total</th>
+            <th class="p-2 border">Action</th>
+          </tr>
+        </thead>
+        <tbody id="billTable" class="bg-white"></tbody>
+      </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-6 text-right space-y-1">
+      <p>Subtotal: ₹<span id="subtotal">0.00</span></p>
+      <p>GST (18%): ₹<span id="gst">0.00</span></p>
+      <p class="font-bold text-lg">Grand Total: ₹<span id="grandTotal">0.00</span></p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-6 flex justify-end gap-3">
+      <button id="printBtn"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">🖨️ Print Bill</button>
+      <button id="clearBtn"
+        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">🗑️ Clear All</button>
+    </div>
+  </div>
+
+  <footer class="mt-8 text-gray-500 text-sm">
+    © 2025 Supermarket Billing System | Created by Rishitha Reddy
+  </footer>
+
+  <script>
+    const form = document.getElementById('itemForm');
+    const billTable = document.getElementById('billTable');
+    const subtotalEl = document.getElementById('subtotal');
+    const gstEl = document.getElementById('gst');
+    const grandTotalEl = document.getElementById('grandTotal');
+    const clearBtn = document.getElementById('clearBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    let items = [];
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = itemName.value.trim();
+      const qty = parseInt(itemQty.value);
+      const price = parseFloat(itemPrice.value);
+
+      if (!name || qty <= 0 || price <= 0) return;
+
+      items.push({ name, qty, price });
+      renderTable();
+      form.reset();
+    });
+
+    function renderTable() {
+      billTable.innerHTML = '';
+      let subtotal = 0;
+
+      items.forEach((item, index) => {
+        const total = item.qty * item.price;
+        subtotal += total;
+
+        const row = `
+          <tr>
+            <td class="border p-2">${index + 1}</td>
+            <td class="border p-2">${item.name}</td>
+            <td class="border p-2">${item.qty}</td>
+            <td class="border p-2">₹${item.price.toFixed(2)}</td>
+            <td class="border p-2">₹${total.toFixed(2)}</td>
+            <td class="border p-2 text-center">
+              <button onclick="removeItem(${index})" class="text-red-600 hover:underline">Remove</button>
+            </td>
+          </tr>
+        `;
+        billTable.insertAdjacentHTML('beforeend', row);
+      });
+
+      const gst = subtotal * 0.18;
+      const grandTotal = subtotal + gst;
+
+      subtotalEl.textContent = subtotal.toFixed(2);
+      gstEl.textContent = gst.toFixed(2);
+      grandTotalEl.textContent = grandTotal.toFixed(2);
+    }
+
+    window.removeItem = (index) => {
+      items.splice(index, 1);
+      renderTable();
+    };
+
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Clear all items?')) {
+        items = [];
+        renderTable();
+      }
+    });
+
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>
